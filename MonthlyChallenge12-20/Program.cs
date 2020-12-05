@@ -9,7 +9,7 @@ namespace MonthlyChallenge12_20
     class Program
     {
         public static List<TileType> AllTypes = new List<TileType>();
-        public static TileType[,] map = new TileType[10, 10];
+        public static TileType[,] map;
 
         public static int PlayerX = 5;
         public static int PlayerY = 5;
@@ -19,9 +19,12 @@ namespace MonthlyChallenge12_20
 
             while (true)
             {
-                Input(Console.ReadKey());
-                Logic();
-                Render();
+                if (Input(Console.ReadKey(true)))
+                {
+                    Logic();
+                    Render();
+                }
+                
             }
         }
 
@@ -45,19 +48,23 @@ namespace MonthlyChallenge12_20
             GroundTile.SearchableType = TileTypeEnum.Ground;
             AllTypes.Add(GroundTile);
 
-            for (int x = 0; x < map.GetLength(0); x++)
+            //convert map to renderable map
+            TileTypeEnum[,] PreMap = LevelGenerator.GenerateLevel();
+            map = new TileType[PreMap.GetLength(0), PreMap.GetLength(1)];
+
+            for (int x = 0; x < PreMap.GetLength(0); x++)
             {
-                for (int y = 0; y < map.GetLength(1); y++)
+                for (int y = 0; y < PreMap.GetLength(1); y++)
                 {
-                    if (x == 0 || y == 0 || x == map.GetLength(0)-1 || y == map.GetLength(1)-1)
+                    if (x == 0 || y == 0 || x == map.GetLength(0) - 1 || y == map.GetLength(1) - 1)
                     {
-                        map[x, y] = AllTypes.Where(i => i.SearchableType == TileTypeEnum.Wall).ToArray()[0];
+                        map[x, y] = AllTypes.Where(i => i.SearchableType == PreMap[x,y]).ToArray()[0];
                     }
                     else
                     {
-                        map[x, y] = AllTypes.Where(i => i.SearchableType == TileTypeEnum.Ground).ToArray()[0];
+                        map[x, y] = AllTypes.Where(i => i.SearchableType == PreMap[x, y]).ToArray()[0];
                     }
-                    
+
                 }
             }
 
@@ -83,7 +90,7 @@ namespace MonthlyChallenge12_20
             Console.Write("O");
         }
 
-        public static void Input(ConsoleKeyInfo Key)
+        public static bool Input(ConsoleKeyInfo Key)
         {
             switch (Key.Key)
             {
@@ -116,8 +123,9 @@ namespace MonthlyChallenge12_20
                     }
                     break;
                 default:
-                    break;
+                    return false;
             }
+            return true;
         }
 
         public static void Logic()
